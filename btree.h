@@ -21,7 +21,6 @@ struct BTreeSearchResult {
 };
 
 class BTree {
-  BTreeNode* root;
   int t; // The minimum_degree
 
   BTreeSearchResult _search(BTreeNode*, int);
@@ -29,6 +28,9 @@ class BTree {
   void _insert(BTreeNode*, int);
 
   public:
+
+  // TODO: Make this private. This is public for test.
+  BTreeNode* root;
 
   BTree(int minimum_degree) {
     if(minimum_degree < 2)
