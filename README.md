@@ -1,4 +1,4 @@
-## Notes from Cormen
+# Notes from Cormen
 The size of a node in a B-Tree is as large as the size of a whole page on disk.
 This is because we want to read as much data as possible in a single disk seek.
 
@@ -11,7 +11,7 @@ done based on the condition that the location contains all elements in a reduced
 `i` is a member.
 So, it recursively reduces the search space by a factor of `t` until the element is found.
 
-### Definition
+## Definition
 Node(x) Attributes:
 1. `n`, the no of keys stored in the node currently
 2. `keys`, an array of size `n` stored sorted and in ascending order
@@ -33,7 +33,7 @@ Properties:
     `h <= log(((n + 1) / 2), t)`
 
 
-### Search
+## Search
 `search(T.root, k)`, where `T` is the B-Tree, and `k` is the key we are searching for.
 Result = `(Node, index)`, where Node is the pointer to the node in which the key resides, and index is the index of the key in the node, such that, `Node.key[index] = k`
 
@@ -42,7 +42,7 @@ Overview:
 2. Check if the key is found
 3. Recursively search the subtree if not a leaf node. Since we are already at the index where the key can be found, we can look at the corresponding child node.
 
-### Insert
+## Insert
 We insert a new node in the appropriate lead node.
 Since, simply inserting it at the leaf node would break the properties (3.2.1) of a B-Tree,
 we split the node at the median key, and move it up to the parent node.
@@ -64,7 +64,7 @@ Note: Handle the case where the root node is full separately before traversing t
   3. Recurse to child
 
 
-#### Node Split
+### Node Split
 Given a non-full internal node `x`, and index `i`such that `x.ci` is a full child(n = 2t - 1).
 1. Create empty node. It is intended to be at the same level as the full node.
 2. Copy keys and children to new node
@@ -74,3 +74,42 @@ Given a non-full internal node `x`, and index `i`such that `x.ci` is a full chil
 6. Increment size of B-Tree node
 
 
+## Delete
+Given a tree rooted at `x`, key to remove from the tree - `k`.
+Given that child `y` that precedes `k` such that `x.keys[i] = k` and `x.children[i] = y`.
+Given that child `z` that succeeds `k` such that `x.keys[i] = k` and `x.children[i+1] = z`.
+1. If `k` is in `x`
+  1. If `x` is a lead node:
+    1. Delete `k` from `x`.
+  2. If `x` is an internal node:
+    1. If `y.n >= t`:
+      1. Find `k'` such that `k' = predecessor(k)`.
+      2. Recursively delete `k'`.
+      3. Replace `k` by `k'` in `x`.
+    2. If `y.n < t`
+      1. Find `k'` such that `k' = successor(k)`.
+      2. Recursively delete `k'`.
+      3. Replace `k` by `k'` in `x`.
+    3. If `y.n <= z.n < t`:
+      1. Merge `k` and all of `z` into `y` such that `x.keys[i] != k` and `x.children[i+1] != z` and `y.n = 2t - 1`.
+      2. Free `z`
+      3. Recursively delete `k` from `y`
+2. Else(`k` not in `x`):
+  1. Find `i` such that `x.keys[i-1] < k < x.keys[i]`
+  2. If `x.children[i].n < t` and (`x.children[i-1].n >= t` or `x.children[i+1].n >= t`)
+    1. Move key from `x` down to `x.children[i]`
+    2. Move key from `x.children[i]`'s immediate left or right sibling up into `x`.
+    3. Move appropriate child pointer from sibling into `x.children[i]`.
+  3. If `x.children[i].n < t` and (`x.children[i-1].n < t` or `x.children[i+1.n < t`):
+    1. Merge `x.children[i]` with one sibling
+    2. Move a key from `x` down into merged node to become median node.
+
+
+# Observations
+1. B-Tree can have sparse levels. Since the cost of search is O(log(h)),
+the cost of search will be less if the no of levels/height is low with dense nodes.
+
+# TODO
+- Add support for Delete
+- Refactor and cleanup code
+- Figure out build system
