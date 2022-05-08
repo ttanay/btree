@@ -7,12 +7,48 @@ bool BTree::is_full(BTreeNodePtr node)
   return node->n == 2 * t - 1;
 }
 
-BTreeSearchResult BTree::search(int element)
+int BTree::min()
 {
-  return _search(root, element, 0);
+  if (!root)
+    throw std::length_error("BTree is empty");
+
+  return min(root);
 }
 
-BTreeSearchResult BTree::_search(BTreeNodePtr node, int element, int height)
+int BTree::min(BTreeNodePtr node)
+{
+  if (node->isLeaf)
+    return node->keys[0];
+  else
+    return min(node->children[0]);
+}
+
+int BTree::max()
+{
+  if (!root)
+    throw std::length_error("BTree is empty");
+
+  return max(root);
+}
+
+int BTree::max(BTreeNodePtr node)
+{
+  auto n = node->n;
+  if (node->isLeaf)
+    return node->keys[n - 1];
+  else
+    return max(node->children[n]);
+}
+
+BTreeSearchResult BTree::search(int element)
+{
+  if (!root)
+    return BTreeSearchResult{};
+
+  return search(root, element, 0);
+}
+
+BTreeSearchResult BTree::search(BTreeNodePtr node, int element, int height)
 {
   int i = 0;
   // Find appropriate index where the key is likely to be found
@@ -24,16 +60,22 @@ BTreeSearchResult BTree::_search(BTreeNodePtr node, int element, int height)
   else if (node->isLeaf)
     return BTreeSearchResult{};
   else
-    return _search(node->children[i], element, height + 1);
+    return search(node->children[i], element, height + 1);
 }
 
 void BTree::insert(int element)
 {
+  if (!search(element).empty())
+    throw std::invalid_argument("Element already exists: " + element);
+
+  if (!root)
+    root = std::make_unique<BTreeNode>();
+
   if (is_full(root))
     split_root();
 
   // insert non-root
-  _insert(root, element);
+  insert(root, element);
 }
 
 void BTree::split_root()
@@ -45,7 +87,7 @@ void BTree::split_root()
   split_child(root, 0);
 }
 
-void BTree::_insert(BTreeNodePtr node, int element)
+void BTree::insert(BTreeNodePtr node, int element)
 {
   if (node->isLeaf)
   {
@@ -81,7 +123,7 @@ void BTree::_insert(BTreeNodePtr node, int element)
     }
 
     // Insert in child node
-    _insert(node->children[i], element);
+    insert(node->children[i], element);
   }
 }
 
@@ -134,12 +176,15 @@ void BTree::split_child(BTreeNodePtr node, int index)
 std::string BTree::to_string()
 {
   std::ostringstream btree_repr;
-  btree_repr << "BTree(" << _to_string(root) << ")";
+  btree_repr << "BTree(" << to_string(root) << ")";
   return btree_repr.str();
 }
 
-std::string BTree::_to_string(BTreeNodePtr node)
+std::string BTree::to_string(BTreeNodePtr node)
 {
+  if (node == nullptr)
+    return "";
+
   std::ostringstream node_repr;
   node_repr << "[keys={";
   for (auto i : node->keys)
@@ -151,10 +196,157 @@ std::string BTree::_to_string(BTreeNodePtr node)
   node_repr << "},children={";
   for (auto c : node->children)
   {
-    node_repr << _to_string(c);
+    node_repr << to_string(c);
     if (!(c == node->children.back()))
       node_repr << ",";
   }
   node_repr << "}]";
   return node_repr.str();
+}
+
+void BTree::del(int element)
+{
+  // We ascertain here that the tree contains the element
+  // so that we don't modify the tree unnecessarily
+  if (search(element).empty())
+    return;
+
+  del(root, element);
+}
+
+void BTree::del(BTreeNodePtr node, int element)
+{
+  int i = appropriate_index(node, element);
+  // If the element to delete is contained in the node
+  if (node->keys[i] == element)
+  {
+    if (node->isLeaf)
+    {
+      // The node is guaranteed to have at least t keys
+      // We can simply delete the key
+      node->keys.erase(node->keys.begin() + i);
+      node->n--;
+    }
+    else
+      del_internal_node(node, i, element);
+  }
+  else
+  {
+    if (node->children[i]->n < t)
+      ensure_child_can_accomodate(node, i);
+    del(node->children[i], element);
+  }
+}
+
+int BTree::appropriate_index(BTreeNodePtr node, int element)
+{
+  int i = 0;
+  for (; i < node->n && node->keys[i] < element; i++)
+    ;
+  return i;
+}
+
+void BTree::del_internal_node(BTreeNodePtr node, int i, int element)
+{
+  // If left child has >= t keys
+  // Delete predecessor from left child's subtree
+  // Replace the element with the predecessor
+  auto left_child = node->children[i];
+  if (left_child->n >= t)
+  {
+    auto replacement = max(left_child);
+    del(left_child, replacement);
+    node->keys[i] = replacement;
+  }
+  else
+  {
+    // If the right child has >= t keys
+    // Delete successor from right child's subtree
+    // Replace the element with the successor
+    auto right_child = node->children[i + 1];
+    if (right_child->n >= t)
+    {
+      auto replacement = min(right_child);
+      del(right_child, replacement);
+      node->keys[i] = replacement;
+    }
+    else
+    {
+      // Merge children and push the element to the merged node
+      merge_children(node, i);
+      // Delete the element from the merged node
+      del(left_child, element);
+    }
+  }
+}
+
+void BTree::merge_children(BTreeNodePtr node, int index)
+{
+  auto left_child = node->children[index];
+  auto right_child = node->children[index + 1];
+  left_child->n += right_child->n + 1;
+
+  // Move element to left_child
+  left_child->keys.push_back(node->keys[index]);
+
+  // Copy keys from right_child to left_child
+  left_child->keys.insert(left_child->keys.end(), right_child->keys.begin(), right_child->keys.end());
+
+  // Copy children pointers from right_child to left_child
+  left_child->children.insert(left_child->children.end(), right_child->children.begin(), right_child->children.end());
+
+  // Delete key and pointer from node
+  node->keys.erase(node->keys.begin() + index);
+  node->children.erase(node->children.begin() + index + 1);
+  node->n -= 1;
+
+  // Update root to the the merged child if node is root
+  if (root == node && node->n == 0)
+    root = left_child;
+}
+
+void BTree::ensure_child_can_accomodate(BTreeNodePtr node, int index)
+{
+  // Check if left sibling can donate
+  auto to_recurse = node->children[index];
+  if (index > 0 && node->children[index - 1]->n >= t)
+  {
+    auto left_sibling = node->children[index - 1];
+    // Move key from node to child
+    to_recurse->keys.insert(to_recurse->keys.begin(), node->keys[index - 1]);
+    // Move key from sibling to node
+    node->keys[index - 1] = left_sibling->keys.back();
+    left_sibling->keys.pop_back();
+    // Move child ptr from sibling to child
+    if (!to_recurse->isLeaf)
+    {
+      to_recurse->children.insert(to_recurse->children.begin(), left_sibling->children.back());
+      left_sibling->children.pop_back();
+    }
+  }
+  // Check if right sibling can donate
+  else if (index < node->n && node->children[index + 1]->n >= t)
+  {
+    auto right_sibling = node->children[index + 1];
+    // Move key from node to child
+    to_recurse->keys.push_back(node->keys[index]);
+    // Move key from sibling to node
+    node->keys[index] = right_sibling->keys.front();
+    right_sibling->keys.erase(right_sibling->keys.begin());
+    // Move child ptr from sibling to child
+    if (!to_recurse->isLeaf)
+    {
+      to_recurse->children.push_back(right_sibling->children.front());
+      right_sibling->children.erase(right_sibling->children.begin());
+    }
+  }
+  // Merge with sibling
+  else
+  {
+    if (index == node->n)
+      // Merge with left child
+      merge_children(node, index - 1);
+    else
+      merge_children(node, index);
+  }
 }
