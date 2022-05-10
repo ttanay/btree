@@ -66,7 +66,7 @@ BTreeSearchResult BTree::search(BTreeNodePtr node, int element, int height)
 void BTree::insert(int element)
 {
   if (!search(element).empty())
-    throw std::invalid_argument("Element already exists: " + element);
+    throw std::invalid_argument("Element already exists: " + std::to_string(element));
 
   if (!root)
     root = std::make_unique<BTreeNode>();
