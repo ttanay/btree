@@ -21,7 +21,7 @@ Node(x) Attributes:
 Properties:
 1. Given a node `x`, any key has a child node `x.c`<sub>`i`</sub>
 2. All leaves have the same height.
-3. 1. `t` is the minimum degree for a B-Tree. `t` >= 2
+3. 1. `t` is the minimum degree for a B-Tree. `t >= 2`
    It is the minimum no of child nodes that a node can have
     For non-root nodes:
     2.1.`t-1` <= `x.n` <= `2t - 1`
@@ -100,16 +100,24 @@ Given that child `z` that succeeds `k` such that `x.keys[i] = k` and `x.children
     1. Move key from `x` down to `x.children[i]`
     2. Move key from `x.children[i]`'s immediate left or right sibling up into `x`.
     3. Move appropriate child pointer from sibling into `x.children[i]`.
-  3. If `x.children[i].n < t` and (`x.children[i-1].n < t` or `x.children[i+1.n < t`):
+  3. If `x.children[i].n < t` and (`x.children[i-1].n < t` and `x.children[i+1].n < t`):
     1. Merge `x.children[i]` with one sibling
     2. Move a key from `x` down into merged node to become median node.
+  4. Recurse
 
+
+### Primitives
+1. **Predecessor**: In the sorted list of the BTree's keys, get the predecessor of the given key according to the sorted order.
+This is done by recursing to the left-most leaf node of the left sub-tree.
+2. **Successor**: In the sorted list of the BTree's keys, get the successor of the given key according to the sorted order.
+This is done by recursing to the right-most leaf node of the right sub-tree.
+3. **MergeChildren**: When both children are low on keys(`n < t`), merge the child nodes into a single node with the key from the node as the median key.
 
 # Observations
 1. B-Tree can have sparse levels. Since the cost of search is O(log(h)),
 the cost of search will be less if the no of levels/height is low with dense nodes.
 
 # TODO
-- Add support for Delete
-- Refactor and cleanup code
-- Figure out build system
+- [X] Add support for Delete
+- [ ] Refactor and cleanup code
+- [X] Figure out build system
