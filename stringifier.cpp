@@ -5,12 +5,6 @@
 
 using namespace std;
 
-string print_btree(int minimum_degree, vector<int> input_stream)
-{
-  BTree btree = BTree(minimum_degree, input_stream);
-  return btree.to_string();
-}
-
 int main(int argc, char **argv)
 {
   int minimum_degree, input_size;
@@ -35,6 +29,6 @@ int main(int argc, char **argv)
     input_stream.push_back(e);
   }
   cout << endl;
-  cout << print_btree(minimum_degree, input_stream) << endl;
+  cout << BTree(minimum_degree, input_stream).toString() << endl;
   return 0;
 }

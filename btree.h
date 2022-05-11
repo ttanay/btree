@@ -9,14 +9,14 @@ struct BTreeNode
   // list of `n` keys
   std::vector<int> keys;
   // whether the node is a leaf
-  bool isLeaf;
+  bool is_leaf;
   // Array of the BTree Node's children
   std::vector<std::shared_ptr<BTreeNode>> children;
 
   BTreeNode()
   {
     n = 0;
-    isLeaf = true;
+    is_leaf = true;
   }
 };
 
@@ -28,7 +28,7 @@ struct BTreeSearchResult
   int height;
   int index;
 
-  bool empty()
+  bool isEmpty()
   {
     return (node == nullptr);
   }
@@ -41,21 +41,21 @@ class BTree
   // The root of the tree
   BTreeNodePtr root;
 
-  bool is_full(BTreeNodePtr node);
+  bool isFull(BTreeNodePtr node);
   int min(BTreeNodePtr node);
   int max(BTreeNodePtr node);
   BTreeSearchResult search(BTreeNodePtr node, int element, int height);
-  std::string to_string(BTreeNodePtr node);
+  std::string toString(BTreeNodePtr node);
 
   void insert(BTreeNodePtr node, int element);
-  void split_child(BTreeNodePtr node, int index);
-  void split_root();
+  void splitChild(BTreeNodePtr node, int index);
+  void splitRoot();
 
   void del(BTreeNodePtr node, int element);
-  void merge_children(BTreeNodePtr node, int index);
-  int appropriate_index(BTreeNodePtr node, int element);
-  void del_internal_node(BTreeNodePtr node, int i, int element);
-  void ensure_child_can_accomodate(BTreeNodePtr node, int element);
+  void mergeChildren(BTreeNodePtr node, int index);
+  int appropriateIndex(BTreeNodePtr node, int element);
+  void delInternalNode(BTreeNodePtr node, int i, int element);
+  void ensureChildCanAccomodate(BTreeNodePtr node, int element);
 
 public:
   /**
@@ -125,5 +125,5 @@ public:
    *   The child nodes are in the same format.
    * @return the string representation
    */
-  std::string to_string();
+  std::string toString();
 };
