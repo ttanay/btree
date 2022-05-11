@@ -48,7 +48,7 @@ TestResult test_btree_insert(int t, std::vector<int> input_stream, std::string e
   BTree btree = BTree(t);
   for (auto i : input_stream)
     btree.insert(i);
-  std::string btree_repr = btree.to_string();
+  std::string btree_repr = btree.toString();
   if (btree_repr == expected)
     return TestResult::pass();
   else
@@ -58,7 +58,7 @@ TestResult test_btree_insert(int t, std::vector<int> input_stream, std::string e
 TestResult test_btree_search(BTree &btree, int element, int expected_height, int expected_index)
 {
   auto result = btree.search(element);
-  if (result.empty())
+  if (result.isEmpty())
     return TestResult::fail("Result is empty");
   if (result.height != expected_height)
     return TestResult::fail("height != expected_height");
@@ -71,7 +71,7 @@ TestResult test_btree_search(BTree &btree, int element, int expected_height, int
 TestResult test_btree_search_not_found(BTree btree, int element)
 {
   auto result = btree.search(element);
-  if (!result.empty())
+  if (!result.isEmpty())
     return TestResult::fail("Result is not empty");
 
   return TestResult::pass();
@@ -132,7 +132,7 @@ TestResult test_btree_max(BTree btree, int expected)
 TestResult test_btree_del(BTree btree, int element, std::string expected_tree)
 {
   btree.del(element);
-  auto btree_repr = btree.to_string();
+  auto btree_repr = btree.toString();
   if (btree_repr == expected_tree)
     return TestResult::pass();
   else
