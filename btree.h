@@ -61,7 +61,7 @@ public:
   /**
    * Initialize a BTree object
    * @param minimum_degree The minimum no of child nodes a non-root node can have
-  */
+   */
   BTree(int minimum_degree)
   {
     if (minimum_degree < 2)
@@ -73,7 +73,7 @@ public:
    * Initialize a BTree object
    * @param minimum_degree The minimum no of child nodes a non-root node can have
    * @param seed_stream A vector of elements to initialize/seed the tree with
-  */
+   */
   BTree(int minimum_degree, std::vector<int> seed_stream) : BTree(minimum_degree)
   {
     for (auto i : seed_stream)
@@ -84,31 +84,31 @@ public:
    * Search for an element in the BTree
    * @param element The element to search for
    * @return the search result
-  */
+   */
   BTreeSearchResult search(int element);
 
   /**
    * Find the minimum element in the BTree
    * @return the min element
-  */
+   */
   int min();
 
   /**
    * Find the maximum element in the BTree
    * @return the max element
-  */
+   */
   int max();
 
   /**
    * Insert an element into the BTree
    * @param element to be inserted
-  */
+   */
   void insert(int element);
 
   /**
    * Delete element from BTree if it exists
    * @param element to be deleted
-  */
+   */
   void del(int element);
 
   /** String representation of a BTree is like the follows:
