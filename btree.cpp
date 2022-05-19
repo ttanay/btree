@@ -55,7 +55,7 @@ BTreeSearchResult BTree::search(BTreeNodePtr node, int element, int height)
   while (i < node->n && node->keys[i] < element)
     i++;
 
-  if (node->keys[i] == element)
+  if (i < node->n && node->keys[i] == element)
     return BTreeSearchResult{node, height, i};
   else if (node->is_leaf)
     return BTreeSearchResult{};
