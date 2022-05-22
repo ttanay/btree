@@ -1,6 +1,6 @@
 #include <iostream>
-#include <vector>
 #include <memory>
+#include <vector>
 
 struct BTreeNode
 {
@@ -28,10 +28,7 @@ struct BTreeSearchResult
   int height;
   int index;
 
-  bool isEmpty()
-  {
-    return (node == nullptr);
-  }
+  bool isEmpty() { return (node == nullptr); }
 };
 
 class BTree
