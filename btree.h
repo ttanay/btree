@@ -3,9 +3,11 @@
 #include <sstream>
 #include <vector>
 
+namespace btree
+{
 
 template <typename T>
-struct BTreeNode
+struct Node
 {
   // no of keys stored in the node
   int n;
@@ -14,9 +16,9 @@ struct BTreeNode
   // whether the node is a leaf
   bool is_leaf;
   // Array of the BTree Node's children
-  std::vector<std::shared_ptr<BTreeNode>> children;
+  std::vector<std::shared_ptr<Node>> children;
 
-  BTreeNode()
+  Node()
   {
     n = 0;
     is_leaf = true;
@@ -24,12 +26,12 @@ struct BTreeNode
 };
 
 template <typename T>
-using BTreeNodePtr = std::shared_ptr<BTreeNode<T>>;
+using NodePtr = std::shared_ptr<Node<T>>;
 
 template <typename T>
-struct BTreeSearchResult
+struct SearchResult
 {
-  BTreeNodePtr<T> node;
+  NodePtr<T> node;
   int height;
   int index;
 
@@ -42,23 +44,23 @@ class BTree
   // The minimum_degree
   int t;
   // The root of the tree
-  BTreeNodePtr<T> root;
+  NodePtr<T> root;
 
-  bool isFull(BTreeNodePtr<T> node);
-  T min(BTreeNodePtr<T> node);
-  T max(BTreeNodePtr<T> node);
-  BTreeSearchResult<T> search(BTreeNodePtr<T> node, T element, int height);
-  std::string toString(BTreeNodePtr<T> node);
+  bool isFull(NodePtr<T> node);
+  T min(NodePtr<T> node);
+  T max(NodePtr<T> node);
+  SearchResult<T> search(NodePtr<T> node, T element, int height);
+  std::string toString(NodePtr<T> node);
 
-  void insert(BTreeNodePtr<T> node, T element);
-  void splitChild(BTreeNodePtr<T> node, int index);
+  void insert(NodePtr<T> node, T element);
+  void splitChild(NodePtr<T> node, int index);
   void splitRoot();
 
-  void del(BTreeNodePtr<T> node, T element);
-  void mergeChildren(BTreeNodePtr<T> node, int index);
-  int appropriateIndex(BTreeNodePtr<T> node, T element);
-  void delInternalNode(BTreeNodePtr<T> node, int i, T element);
-  void ensureChildCanAccomodate(BTreeNodePtr<T> node, int index);
+  void del(NodePtr<T> node, T element);
+  void mergeChildren(NodePtr<T> node, int index);
+  int appropriateIndex(NodePtr<T> node, T element);
+  void delInternalNode(NodePtr<T> node, int i, T element);
+  void ensureChildCanAccomodate(NodePtr<T> node, int index);
 
 public:
   /**
@@ -88,7 +90,7 @@ public:
    * @param element The element to search for
    * @return the search result
    */
-  BTreeSearchResult<T> search(T element);
+  SearchResult<T> search(T element);
 
   /**
    * Find the minimum element in the BTree
@@ -132,7 +134,7 @@ public:
 };
 
 template <typename T>
-bool BTree<T>::isFull(BTreeNodePtr<T> node)
+bool BTree<T>::isFull(NodePtr<T> node)
 {
   return node->n == 2 * t - 1;
 }
@@ -147,7 +149,7 @@ T BTree<T>::min()
 }
 
 template <typename T>
-T BTree<T>::min(BTreeNodePtr<T> node)
+T BTree<T>::min(NodePtr<T> node)
 {
   if (node->is_leaf)
     return node->keys[0];
@@ -165,7 +167,7 @@ T BTree<T>::max()
 }
 
 template <typename T>
-T BTree<T>::max(BTreeNodePtr<T> node)
+T BTree<T>::max(NodePtr<T> node)
 {
   auto n = node->n;
   if (node->is_leaf)
@@ -175,16 +177,16 @@ T BTree<T>::max(BTreeNodePtr<T> node)
 }
 
 template <typename T>
-BTreeSearchResult<T> BTree<T>::search(T element)
+SearchResult<T> BTree<T>::search(T element)
 {
   if (!root)
-    return BTreeSearchResult<T>{};
+    return SearchResult<T>{};
 
   return search(root, element, 0);
 }
 
 template <typename T>
-BTreeSearchResult<T> BTree<T>::search(BTreeNodePtr<T> node, T element, int height)
+SearchResult<T> BTree<T>::search(NodePtr<T> node, T element, int height)
 {
   int i = 0;
   // Find appropriate index where the key is likely to be found
@@ -193,9 +195,9 @@ BTreeSearchResult<T> BTree<T>::search(BTreeNodePtr<T> node, T element, int heigh
 
   if (i < node->n && node->keys[i] == element)
     // TODO: Type deduction doesn't work here for some reason. Investigate
-    return BTreeSearchResult<T>{node, height, i};
+    return SearchResult<T>{node, height, i};
   else if (node->is_leaf)
-    return BTreeSearchResult<T>{};
+    return SearchResult<T>{};
   else
     return search(node->children[i], element, height + 1);
 }
@@ -207,7 +209,7 @@ void BTree<T>::insert(T element)
     throw std::invalid_argument("Element already exists: " + std::to_string(element));
 
   if (!root)
-    root = std::make_unique<BTreeNode<T>>();
+    root = std::make_unique<Node<T>>();
 
   if (isFull(root))
     splitRoot();
@@ -219,7 +221,7 @@ void BTree<T>::insert(T element)
 template <typename T>
 void BTree<T>::splitRoot()
 {
-  BTreeNodePtr<T> new_root = std::make_shared<BTreeNode<T>>();
+  NodePtr<T> new_root = std::make_shared<Node<T>>();
   new_root->is_leaf = false;
   new_root->children.insert(new_root->children.begin(), root);
   root = new_root;
@@ -227,7 +229,7 @@ void BTree<T>::splitRoot()
 }
 
 template <typename T>
-void BTree<T>::insert(BTreeNodePtr<T> node, T element)
+void BTree<T>::insert(NodePtr<T> node, T element)
 {
   if (node->is_leaf)
   {
@@ -268,10 +270,10 @@ void BTree<T>::insert(BTreeNodePtr<T> node, T element)
 }
 
 template <typename T>
-void BTree<T>::splitChild(BTreeNodePtr<T> node, int index)
+void BTree<T>::splitChild(NodePtr<T> node, int index)
 {
-  BTreeNodePtr<T> new_child = std::make_shared<BTreeNode<T>>();
-  BTreeNodePtr<T> child = node->children[index];
+  NodePtr<T> new_child = std::make_shared<Node<T>>();
+  NodePtr<T> child = node->children[index];
 
   new_child->is_leaf = child->is_leaf;
   new_child->n = t - 1;
@@ -323,7 +325,7 @@ std::string BTree<T>::toString()
 }
 
 template <typename T>
-std::string BTree<T>::toString(BTreeNodePtr<T> node)
+std::string BTree<T>::toString(NodePtr<T> node)
 {
   if (node == nullptr)
     return "";
@@ -359,7 +361,7 @@ void BTree<T>::del(T element)
 }
 
 template <typename T>
-void BTree<T>::del(BTreeNodePtr<T> node, T element)
+void BTree<T>::del(NodePtr<T> node, T element)
 {
   int i = appropriateIndex(node, element);
   // If the element to delete is contained in the node
@@ -384,7 +386,7 @@ void BTree<T>::del(BTreeNodePtr<T> node, T element)
 }
 
 template <typename T>
-int BTree<T>::appropriateIndex(BTreeNodePtr<T> node, T element)
+int BTree<T>::appropriateIndex(NodePtr<T> node, T element)
 {
   int i = 0;
   for (; i < node->n && node->keys[i] < element; i++)
@@ -393,7 +395,7 @@ int BTree<T>::appropriateIndex(BTreeNodePtr<T> node, T element)
 }
 
 template <typename T>
-void BTree<T>::delInternalNode(BTreeNodePtr<T> node, int i, T element)
+void BTree<T>::delInternalNode(NodePtr<T> node, int i, T element)
 {
   // If left child has >= t keys
   // Delete predecessor from left child's subtree
@@ -428,7 +430,7 @@ void BTree<T>::delInternalNode(BTreeNodePtr<T> node, int i, T element)
 }
 
 template <typename T>
-void BTree<T>::mergeChildren(BTreeNodePtr<T> node, int index)
+void BTree<T>::mergeChildren(NodePtr<T> node, int index)
 {
   auto left_child = node->children[index];
   auto right_child = node->children[index + 1];
@@ -454,7 +456,7 @@ void BTree<T>::mergeChildren(BTreeNodePtr<T> node, int index)
 }
 
 template <typename T>
-void BTree<T>::ensureChildCanAccomodate(BTreeNodePtr<T> node, int index)
+void BTree<T>::ensureChildCanAccomodate(NodePtr<T> node, int index)
 {
   // Check if left sibling can donate
   auto to_recurse = node->children[index];
@@ -498,4 +500,5 @@ void BTree<T>::ensureChildCanAccomodate(BTreeNodePtr<T> node, int index)
     else
       mergeChildren(node, index);
   }
+}
 }

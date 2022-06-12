@@ -29,7 +29,7 @@ int main(int argc, char **argv)
     input_stream.push_back(e);
   }
   cout << endl;
-  BTree btree{minimum_degree, input_stream};
+  btree::BTree btree{minimum_degree, input_stream};
   cout << btree.toString() << endl;
   return 0;
 }
