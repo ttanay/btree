@@ -14,7 +14,7 @@ TEST_CASE("BTree::insert works", "[BTree::insert]")
 TEST_CASE("BTree::insert throws on duplicate input", "[BTree::insert]")
 {
   btree::BTree btree{2, std ::vector<int>{1, 3, 5, 4}};
-  REQUIRE_THROWS_WITH(btree.insert(1), "Element already exists: 1");
+  REQUIRE_THROWS_WITH(btree.insert(1), "Element already exists");
 }
 
 TEST_CASE("BTree::search works", "[BTree::search]")
