@@ -49,17 +49,17 @@ class BTree
   bool isFull(NodePtr<T> node);
   T min(NodePtr<T> node);
   T max(NodePtr<T> node);
-  SearchResult<T> search(NodePtr<T> node, T element, int height);
+  SearchResult<T> search(NodePtr<T> node, const T & element, int height);
   std::string toString(NodePtr<T> node);
 
-  void insert(NodePtr<T> node, T element);
+  void insert(NodePtr<T> node, const T & element);
   void splitChild(NodePtr<T> node, int index);
   void splitRoot();
 
-  void del(NodePtr<T> node, T element);
+  void del(NodePtr<T> node, const T & element);
   void mergeChildren(NodePtr<T> node, int index);
-  int appropriateIndex(NodePtr<T> node, T element);
-  void delInternalNode(NodePtr<T> node, int i, T element);
+  int appropriateIndex(NodePtr<T> node, const T & element);
+  void delInternalNode(NodePtr<T> node, int i, const T & element);
   void ensureChildCanAccomodate(NodePtr<T> node, int index);
 
 public:
@@ -90,7 +90,7 @@ public:
    * @param element The element to search for
    * @return the search result
    */
-  SearchResult<T> search(T element);
+  SearchResult<T> search(const T & element);
 
   /**
    * Find the minimum element in the BTree
@@ -108,13 +108,13 @@ public:
    * Insert an element into the BTree
    * @param element to be inserted
    */
-  void insert(T element);
+  void insert(const T & element);
 
   /**
    * Delete element from BTree if it exists
    * @param element to be deleted
    */
-  void del(T element);
+  void del(const T & element);
 
   /** String representation of a BTree is like the follows:
    *   BTree(keys={5},children={[keys={3},children={}],[keys={8},children={}]})
@@ -177,7 +177,7 @@ T BTree<T>::max(NodePtr<T> node)
 }
 
 template <typename T>
-SearchResult<T> BTree<T>::search(T element)
+SearchResult<T> BTree<T>::search(const T & element)
 {
   if (!root)
     return SearchResult<T>{};
@@ -186,7 +186,7 @@ SearchResult<T> BTree<T>::search(T element)
 }
 
 template <typename T>
-SearchResult<T> BTree<T>::search(NodePtr<T> node, T element, int height)
+SearchResult<T> BTree<T>::search(NodePtr<T> node, const T & element, int height)
 {
   int i = 0;
   // Find appropriate index where the key is likely to be found
@@ -202,8 +202,10 @@ SearchResult<T> BTree<T>::search(NodePtr<T> node, T element, int height)
     return search(node->children[i], element, height + 1);
 }
 
+// TODO: Support a safe version of this method
+// TODO: Support a move version of this method
 template <typename T>
-void BTree<T>::insert(T element)
+void BTree<T>::insert(const T & element)
 {
   if (!search(element).isEmpty())
     throw std::invalid_argument("Element already exists: " + std::to_string(element));
@@ -229,7 +231,7 @@ void BTree<T>::splitRoot()
 }
 
 template <typename T>
-void BTree<T>::insert(NodePtr<T> node, T element)
+void BTree<T>::insert(NodePtr<T> node, const T & element)
 {
   if (node->is_leaf)
   {
@@ -350,7 +352,7 @@ std::string BTree<T>::toString(NodePtr<T> node)
 }
 
 template <typename T>
-void BTree<T>::del(T element)
+void BTree<T>::del(const T & element)
 {
   // We ascertain here that the tree contains the element
   // so that we don't modify the tree unnecessarily
@@ -361,7 +363,7 @@ void BTree<T>::del(T element)
 }
 
 template <typename T>
-void BTree<T>::del(NodePtr<T> node, T element)
+void BTree<T>::del(NodePtr<T> node, const T & element)
 {
   int i = appropriateIndex(node, element);
   // If the element to delete is contained in the node
@@ -386,7 +388,7 @@ void BTree<T>::del(NodePtr<T> node, T element)
 }
 
 template <typename T>
-int BTree<T>::appropriateIndex(NodePtr<T> node, T element)
+int BTree<T>::appropriateIndex(NodePtr<T> node, const T & element)
 {
   int i = 0;
   for (; i < node->n && node->keys[i] < element; i++)
@@ -395,7 +397,7 @@ int BTree<T>::appropriateIndex(NodePtr<T> node, T element)
 }
 
 template <typename T>
-void BTree<T>::delInternalNode(NodePtr<T> node, int i, T element)
+void BTree<T>::delInternalNode(NodePtr<T> node, int i, const T & element)
 {
   // If left child has >= t keys
   // Delete predecessor from left child's subtree
