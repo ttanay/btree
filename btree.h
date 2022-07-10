@@ -211,7 +211,9 @@ template <typename T>
 void BTree<T>::insert(const T & element)
 {
   if (!search(element).isEmpty())
-    throw std::invalid_argument("Element already exists: " + std::to_string(element));
+    // TODO: printing all types of elements may not be a good idea
+    //throw std::invalid_argument("Element already exists: " + std::to_string(element));
+    throw std::invalid_argument("Element already exists");
 
   if (!root)
     root = std::make_unique<Node<T>>();
