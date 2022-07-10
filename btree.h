@@ -63,6 +63,9 @@ class BTree
   void ensureChildCanAccomodate(NodePtr<T> node, int index);
 
 public:
+  // TODO: Figure out a good default minimum degree
+  BTree() { t = 2; }
+
   /**
    * Initialize a BTree object
    * @param minimum_degree The minimum no of child nodes a non-root node can have
