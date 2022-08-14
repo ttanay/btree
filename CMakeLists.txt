@@ -24,5 +24,12 @@ target_link_libraries(map_test Catch2::Catch2)
 add_executable(btree_benchmark btree_benchmark.cpp)
 target_link_libraries(btree_benchmark benchmark::benchmark)
 
-# enable_testing()
-# add_test(tests tests)
+enable_testing()
+add_test(
+  NAME bree_test
+  COMMAND $<TARGET_FILE:btree_test>
+)
+add_test(
+  NAME map_test
+  COMMAND $<TARGET_FILE:map_test>
+)
