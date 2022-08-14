@@ -134,6 +134,11 @@ public:
    * @return the string representation
    */
   std::string toString();
+
+  void clear()
+  {
+    root = nullptr;
+  }
 };
 
 template <typename T>
