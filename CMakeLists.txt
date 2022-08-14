@@ -7,6 +7,8 @@ include(CTest)
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_C_COMPILER gcc)
+set(CMAKE_CXX_COMPILER g++)
 
 find_package(Catch2 REQUIRED)
 find_package(benchmark REQUIRED)
