@@ -118,3 +118,11 @@ TEST_CASE("Btree:del empty tree", "[BTree::del]")
   btree.del(5);
   REQUIRE(btree.toString() == "BTree()");
 }
+
+TEST_CASE("BTree::clear works", "[BTree::clear]")
+{
+  btree::BTree btree{2, std::vector<int>{4, 5, 6, 2}};
+  btree.clear();
+  auto expected = "BTree()";
+  REQUIRE(btree.toString() == expected);
+}
