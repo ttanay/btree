@@ -1,5 +1,7 @@
 #include <iostream>
 #include <memory>
+#include <mutex>
+#include <shared_mutex>
 #include <sstream>
 #include <vector>
 
@@ -45,6 +47,8 @@ class BTree
   int t;
   // The root of the tree
   NodePtr<T> root;
+
+  std::shared_mutex rw_lock;
 
   bool isFull(NodePtr<T> node);
   T min(NodePtr<T> node);
@@ -150,6 +154,7 @@ bool BTree<T>::isFull(NodePtr<T> node)
 template <typename T>
 T BTree<T>::min()
 {
+  std::shared_lock<std::shared_mutex> rlock(rw_lock);
   if (!root)
     throw std::length_error("BTree is empty");
 
@@ -168,6 +173,7 @@ T BTree<T>::min(NodePtr<T> node)
 template <typename T>
 T BTree<T>::max()
 {
+  std::shared_lock<std::shared_mutex> rlock(rw_lock);
   if (!root)
     throw std::length_error("BTree is empty");
 
@@ -187,6 +193,7 @@ T BTree<T>::max(NodePtr<T> node)
 template <typename T>
 SearchResult<T> BTree<T>::search(const T & element)
 {
+  std::shared_lock<std::shared_mutex> rlock(rw_lock);
   if (!root)
     return SearchResult<T>{};
 
@@ -216,10 +223,9 @@ template <typename T>
 void BTree<T>::insert(const T & element)
 {
   if (!search(element).isEmpty())
-    // TODO: printing all types of elements may not be a good idea
-    //throw std::invalid_argument("Element already exists: " + std::to_string(element));
     throw std::invalid_argument("Element already exists");
 
+  std::unique_lock wlock {rw_lock};
   if (!root)
     root = std::make_unique<Node<T>>();
 
@@ -369,6 +375,7 @@ void BTree<T>::del(const T & element)
   if (search(element).isEmpty())
     return;
 
+  std::unique_lock<std::shared_mutex> wlock(rw_lock);
   del(root, element);
 }
 
