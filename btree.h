@@ -266,7 +266,7 @@ void BTree<T>::insert(NodePtr<T> node, const T & element)
     int i = appropriateIndex(node, element);
 
     // Split child if node is full
-    if (node->children[i]->n == (2 * t - 1))
+    if (isFull(node->children[i]))
     {
       splitChild(node, i);
       // Increment index in case the key propogated up from the split
