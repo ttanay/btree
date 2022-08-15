@@ -253,24 +253,17 @@ void BTree<T>::insert(NodePtr<T> node, const T & element)
   {
     // The assumption here is that the leaf node will always be non-full
     //  => n < 2t -1
-    int i = node->n - 1;
-    // Move keys one place to the right to make space to insert the element
-    for (; i >= 0 && node->keys[i] > element; i--)
-      ;
+    int i = appropriateIndex(node, element);
 
     // Insert at the correct index
-    node->keys.insert(node->keys.begin() + i + 1, element);
+    node->keys.insert(node->keys.begin() + i , element);
     // Increment size
     node->n += 1;
   }
   else
   {
     // Find the appropriate location
-    int i = node->n - 1;
-    for (; i >= 0 && node->keys[i] > element; i--)
-      ;
-    // The appropriate place will be the right child of the key
-    i += 1;
+    int i = appropriateIndex(node, element);
 
     // Split child if node is full
     if (node->children[i]->n == (2 * t - 1))
