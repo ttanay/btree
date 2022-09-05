@@ -15,10 +15,5 @@ make -C ./build/
 ```
 This will create two binaries - `btree_stringifier` and `btree_test`.
 
-# TODO
-- [X] Add support for Delete
-- [ ] Refactor and cleanup code
-- [X] Figure out build system
-
 # Reference
 1. Cormen, T. H., Leiserson, C. E., Rivest, R. L.,, Stein, C. (2001). Introduction to Algorithms. The MIT Press. ISBN: 0262032937
