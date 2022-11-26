@@ -24,12 +24,14 @@ TEST_CASE("BTree::search works", "[BTree::search]")
   REQUIRE(result.height == 1);
   REQUIRE(result.index == 1);
 }
+
 TEST_CASE("BTree::search not found", "[BTree::search]")
 {
   btree::BTree btree{2, std::vector<int>{1}};
   auto result = btree.search(10);
   REQUIRE(result.isEmpty());
 }
+
 TEST_CASE("BTree::search empty tree", "[BTree::search]")
 {
   auto result = btree::BTree<int>(2).search(100);
@@ -84,8 +86,6 @@ TEST_CASE("BTree::del root", "[BTree::del]")
   REQUIRE(btree.toString() == expected);
 }
 
-// This test case is sus. The assert I wrote earlier is not the same.
-// Work it out on paper
 TEST_CASE("BTree::del merge children", "[BTree::del]")
 {
   btree::BTree btree{2, std::vector<int>{1, 3, 5, 4, 7, 8, 9, 2, 6, 10, 12}};
