@@ -86,13 +86,12 @@ TEST_CASE("BTree::del root", "[BTree::del]")
 
 // This test case is sus. The assert I wrote earlier is not the same.
 // Work it out on paper
-TEST_CASE("BTree::del merge children", "[BTree::del][!mayfail]")
+TEST_CASE("BTree::del merge children", "[BTree::del]")
 {
   btree::BTree btree{2, std::vector<int>{1, 3, 5, 4, 7, 8, 9, 2, 6, 10, 12}};
   btree.del(3);
   btree.del(2);
-  auto expected
-    = "BTree([keys={},children={[keys={5,8},children={[keys={1,4},children={}],[keys={6,7},children={}],[keys={9,10,12},children={}]}]}])";
+  auto expected= "BTree([keys={5,8},children={[keys={1,4},children={}],[keys={6,7},children={}],[keys={9,10,12},children={}]}])";
   REQUIRE(btree.toString() == expected);
 }
 
